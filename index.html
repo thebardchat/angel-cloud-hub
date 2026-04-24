@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ANGEL CLOUD — AI Built for the People Left Behind</title>
+<meta name="description" content="Shane Brazelton's personal AI ecosystem. Built on a Raspberry Pi 5 in Hazel Green, Alabama. Local AI for the 800 million Windows users losing security updates.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  /* ─── RESET & BASE ─── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #02050c;
+    --panel: #12151f;
+    --border: #1f2434;
+    --border-bright: #2d3350;
+    --text: #e8eaf0;
+    --text-secondary: #9da3b3;
+    --text-dim: #5c6274;
+    --blue: #3b82f6;
+    --blue-glow: rgba(59,130,246,0.15);
+    --blue-bright: #60a5fa;
+    --purple: #a855f7;
+    --purple-glow: rgba(168,85,247,0.15);
+    --amber: #f5b400;
+    --amber-glow: rgba(245,180,0,0.12);
+    --green: #22c55e;
+    --green-glow: rgba(34,197,94,0.12);
+    --red: #ef4444;
+    --red-glow: rgba(239,68,68,0.12);
+    --chrome: linear-gradient(180deg, #ffffff 0%, #d4d7e0 45%, #6c7080 55%, #2a2d38 100%);
+    --chrome-alt: linear-gradient(180deg, #e8eaf0 0%, #c8ccd8 40%, #7c8090 55%, #1a1d28 100%);
+    --font-display: 'Unbounded', sans-serif;
+    --font-body: 'Instrument Sans', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --nav-h: 64px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ─── BACKGROUND CANVAS LAYERS ─── */
+  #bg-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  #circuit-svg {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.18;
+  }
+
+  .vignette {
+    position: fixed;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(2,5,12,0.85) 100%);
+  }
+
+  /* ─── LAYOUT ─── */
+  .site-wrap {
+    position: relative;
+    z-index: 10;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ─── NAV ─── */
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    height: var(--nav-h);
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    background: rgba(2, 5, 12, 0.88);
+    backdrop-filter: blur(16px) saturate(1.4);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  }
+
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  .nav-logo {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    background: var(--chrome);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+  }
+
+  .nav-logo .triangle {
+    display: inline-block;
+    background: linear-gradient(160deg, #ffffff 0%, #60a5fa 40%, #a855f7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 16px;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    text-decoration: none;
+    padding: 8px 14px;
+    border-radius: 4px;
+    transition: color 0.2s, background 0.2s;
+  }
+
+  .nav-links a:hover {
+    color: var(--text);
+    background: rgba(255,255,255,0.04);
+  }
+
+  .nav-github {
+    font-family: var(--font-mono) !important;
+    font-size: 11px !important;
+    color: var(--blue) !important;
+    border: 1px solid rgba(59,130,246,0.3) !important;
+    padding: 6px 14px !important;
+    border-radius: 4px !important;
+    transition: all 0.2s !important;
+  }
+
+  .nav-github:hover {
+    background: rgba(59,130,246,0.1) !important;
+    border-color: rgba(59,130,246,0.6) !important;
+    color: var(--blue-bright) !important;
+  }
+
+  /* ─── HERO ─── */
+  .hero {
+    padding: 120px 0 80px;
+    text-align: center;
+    position: relative;
+  }
+
+  .hero-tagline {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--blue);
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.2s forwards;
+  }
+
+  .hero-tagline::before,
+  .hero-tagline::after {
+    content: '';
+    width: 40px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--blue));
+  }
+
+  .hero-tagline::after {
+    background: linear-gradient(270deg, transparent, var(--blue));
+  }
+
+  .hero-headline {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: clamp(42px, 7vw, 88px);
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    margin-bottom: 32px;
+    opacity: 0;
+    animation: fadeUp 0.9s ease 0.35s forwards;
+  }
+
+  .hero-headline .chrome-text {
+    display: block;
+    background: var(--chrome);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 2px 20px rgba(100,120,200,0.3));
+  }
+
+  .hero-lead {
+    font-size: 18px;
+    line-height: 1.7;
+    color: var(--text-secondary);
+    max-width: 620px;
+    margin: 0 auto 44px;
+    font-weight: 400;
+    opacity: 0;
+    animation: fadeUp 0.9s ease 0.5s forwards;
+  }
+
+  .hero-ctas {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 64px;
+    opacity: 0;
+    animation: fadeUp 0.9s ease 0.65s forwards;
+  }
+
+  .btn-primary {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: #fff;
+    background: var(--blue);
+    padding: 14px 28px;
+    border-radius: 6px;
+    text-decoration: none;
+    border: 1px solid transparent;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.25s;
+  }
+
+  .btn-primary:hover {
+    background: var(--blue-bright);
+    box-shadow: 0 0 30px rgba(59,130,246,0.4);
+    transform: translateY(-2px);
+  }
+
+  .btn-primary:hover::before { opacity: 1; }
+
+  .btn-secondary {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: var(--text-secondary);
+    background: transparent;
+    padding: 14px 28px;
+    border-radius: 6px;
+    text-decoration: none;
+    border: 1px solid var(--border-bright);
+    transition: all 0.25s;
+  }
+
+  .btn-secondary:hover {
+    color: var(--text);
+    border-color: rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.04);
+    transform: translateY(-2px);
+  }
+
+  /* ─── HERO STATS ─── */
+  .hero-stats {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    opacity: 0;
+    animation: fadeUp 0.9s ease 0.8s forwards;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: rgba(18,21,31,0.7);
+    max-width: 600px;
+    margin: 0 auto;
+    overflow: hidden;
+  }
+
+  .stat {
+    flex: 1;
+    padding: 24px 20px;
+    text-align: center;
+    border-right: 1px solid var(--border);
+    position: relative;
+  }
+
+  .stat:last-child { border-right: none; }
+
+  .stat-num {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 28px;
+    letter-spacing: -0.02em;
+    background: var(--chrome);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat-label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .stat-pulse {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+
+  /* ─── SECTION HEADERS ─── */
+  .section-header {
+    margin-bottom: 60px;
+  }
+
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--blue);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border-bright), transparent);
+    max-width: 200px;
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: clamp(32px, 4vw, 52px);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    background: var(--chrome-alt);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ─── ECOSYSTEM SECTION ─── */
+  .ecosystem-section {
+    padding: 100px 0;
+  }
+
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  @media (max-width: 900px) {
+    .cards-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 580px) {
+    .cards-grid { grid-template-columns: 1fr; }
+    .nav-links { display: none; }
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1),
+                box-shadow 0.3s ease,
+                border-color 0.3s ease;
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  .card.revealed {
+    animation: cardReveal 0.6s ease forwards;
+  }
+
+  @keyframes cardReveal {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card:hover {
+    transform: translateY(-6px) scale(1.01);
+    z-index: 2;
+  }
+
+  .card-accent-bar {
+    height: 3px;
+    width: 100%;
+    flex-shrink: 0;
+  }
+
+  .card-body {
+    padding: 20px 22px 22px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .card-num {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    padding: 3px 7px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+  }
+
+  .card-status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+    animation: pulse 3s ease-in-out infinite;
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+
+  .card-name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.03em;
+    line-height: 1.3;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+
+  .card-desc {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    flex: 1;
+    margin-bottom: 18px;
+    font-weight: 400;
+  }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+    margin-top: auto;
+  }
+
+  .card-domain {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    color: var(--text-dim);
+    transition: color 0.2s;
+  }
+
+  .card:hover .card-domain { color: var(--text-secondary); }
+
+  .card-arrow {
+    font-size: 12px;
+    color: var(--text-dim);
+    transition: transform 0.2s, color 0.2s;
+  }
+
+  .card:hover .card-arrow {
+    transform: translateX(4px);
+  }
+
+  /* Per-color variants */
+  .card[data-color="blue"]:hover {
+    border-color: rgba(59,130,246,0.4);
+    box-shadow: 0 12px 40px rgba(59,130,246,0.12), 0 0 0 1px rgba(59,130,246,0.15);
+  }
+  .card[data-color="blue"]:hover .card-domain,
+  .card[data-color="blue"]:hover .card-arrow { color: var(--blue); }
+
+  .card[data-color="green"]:hover {
+    border-color: rgba(34,197,94,0.4);
+    box-shadow: 0 12px 40px rgba(34,197,94,0.12), 0 0 0 1px rgba(34,197,94,0.15);
+  }
+  .card[data-color="green"]:hover .card-domain,
+  .card[data-color="green"]:hover .card-arrow { color: var(--green); }
+
+  .card[data-color="amber"]:hover {
+    border-color: rgba(245,180,0,0.4);
+    box-shadow: 0 12px 40px rgba(245,180,0,0.12), 0 0 0 1px rgba(245,180,0,0.15);
+  }
+  .card[data-color="amber"]:hover .card-domain,
+  .card[data-color="amber"]:hover .card-arrow { color: var(--amber); }
+
+  .card[data-color="red"]:hover {
+    border-color: rgba(239,68,68,0.4);
+    box-shadow: 0 12px 40px rgba(239,68,68,0.12), 0 0 0 1px rgba(239,68,68,0.15);
+  }
+  .card[data-color="red"]:hover .card-domain,
+  .card[data-color="red"]:hover .card-arrow { color: var(--red); }
+
+  .card[data-color="purple"]:hover {
+    border-color: rgba(168,85,247,0.4);
+    box-shadow: 0 12px 40px rgba(168,85,247,0.12), 0 0 0 1px rgba(168,85,247,0.15);
+  }
+  .card[data-color="purple"]:hover .card-domain,
+  .card[data-color="purple"]:hover .card-arrow { color: var(--purple); }
+
+  /* ─── HARDWARE SECTION ─── */
+  .hardware-section {
+    padding: 100px 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .hardware-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+  }
+
+  @media (max-width: 768px) {
+    .hardware-inner { grid-template-columns: 1fr; gap: 40px; }
+  }
+
+  .hw-left {
+    position: relative;
+  }
+
+  .hw-pi-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+
+  .hw-pi-big {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: clamp(80px, 12vw, 140px);
+    letter-spacing: -0.04em;
+    line-height: 0.9;
+    background: var(--chrome);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 4px 30px rgba(100,120,200,0.25));
+    margin-bottom: 24px;
+  }
+
+  .hw-specs-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .hw-spec {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    letter-spacing: 0.02em;
+  }
+
+  .hw-spec::before {
+    content: '·';
+    color: var(--blue);
+    font-size: 18px;
+    line-height: 0;
+    flex-shrink: 0;
+  }
+
+  .hw-right {}
+
+  .terminal {
+    background: #080b12;
+    border: 1px solid var(--border-bright);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04);
+  }
+
+  .terminal-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.03);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .term-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+  .term-dot.red { background: #ef4444; }
+  .term-dot.amber { background: #f5b400; }
+  .term-dot.green { background: #22c55e; }
+
+  .term-title {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+    margin-left: 8px;
+  }
+
+  .terminal-body {
+    padding: 20px 22px 22px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.9;
+  }
+
+  .term-line {
+    display: flex;
+    gap: 16px;
+  }
+
+  .term-key {
+    color: var(--blue);
+    min-width: 90px;
+    flex-shrink: 0;
+  }
+
+  .term-val {
+    color: var(--text);
+  }
+
+  .term-prompt {
+    color: var(--text-dim);
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .term-cursor {
+    display: inline-block;
+    width: 8px;
+    height: 14px;
+    background: var(--blue);
+    animation: blink 1.1s step-end infinite;
+    vertical-align: middle;
+    border-radius: 1px;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  .hw-badge {
+    margin-top: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--green);
+    border: 1px solid rgba(34,197,94,0.25);
+    background: rgba(34,197,94,0.06);
+    padding: 7px 14px;
+    border-radius: 4px;
+  }
+
+  .hw-badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--green);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--green);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  /* ─── MISSION SECTION ─── */
+  .mission-section {
+    padding: 120px 0;
+  }
+
+  .mission-inner {
+    max-width: 760px;
+  }
+
+  .mission-quote {
+    font-family: var(--font-body);
+    font-style: italic;
+    font-size: clamp(20px, 2.5vw, 28px);
+    line-height: 1.5;
+    color: var(--text);
+    font-weight: 400;
+    border-left: 3px solid var(--blue);
+    padding: 20px 0 20px 32px;
+    margin: 48px 0 40px;
+    position: relative;
+  }
+
+  .mission-quote::before {
+    content: '"';
+    font-family: var(--font-display);
+    font-size: 80px;
+    color: rgba(59,130,246,0.12);
+    position: absolute;
+    top: -10px;
+    left: 20px;
+    line-height: 1;
+  }
+
+  .mission-p {
+    font-size: 17px;
+    line-height: 1.8;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+  }
+
+  .mission-p strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .mission-divider {
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--blue), var(--purple));
+    margin: 40px 0;
+    border-radius: 2px;
+  }
+
+  /* ─── FOOTER ─── */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding: 60px 0;
+  }
+
+  .footer-inner {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 60px;
+    align-items: start;
+  }
+
+  @media (max-width: 640px) {
+    .footer-inner { grid-template-columns: 1fr; gap: 40px; }
+  }
+
+  .footer-logo {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 0.08em;
+    background: var(--chrome);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+  }
+
+  .footer-byline {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+    margin-bottom: 20px;
+    line-height: 1.7;
+  }
+
+  .footer-github {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--blue);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.2s;
+  }
+
+  .footer-github:hover { color: var(--blue-bright); }
+
+  .footer-links-title {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+  }
+
+  .footer-domains {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+  }
+
+  .footer-domains a {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    text-decoration: none;
+    letter-spacing: 0.04em;
+    transition: color 0.2s;
+    white-space: nowrap;
+  }
+
+  .footer-domains a:hover { color: var(--text-secondary); }
+
+  .footer-bottom {
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .footer-copy {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+  }
+
+  .footer-pi-badge {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.04em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .footer-pi-badge::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    background: var(--green);
+    border-radius: 50%;
+    box-shadow: 0 0 6px var(--green);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── SCROLLBAR ─── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+
+  /* ─── SECTION DIVIDERS ─── */
+  .section-rule {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-bright), transparent);
+    margin: 0 auto;
+    max-width: 1200px;
+  }
+</style>
+</head>
+<body>
+
+<!-- Background Canvas (binary rain + grid) -->
+<canvas id="bg-canvas"></canvas>
+
+<!-- Circuit SVG traces -->
+<svg id="circuit-svg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="glow-blue">
+      <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+      <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow-red">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <!-- Main blue trace -->
+  <path d="M -20,200 L 120,200 L 120,340 L 260,340 L 260,180 L 480,180 L 480,300 L 620,300 L 620,220 L 820,220 L 820,400 L 960,400 L 960,260 L 1200,260 L 1200,180 L 1460,180"
+        stroke="#3b82f6" stroke-width="1.2" fill="none" filter="url(#glow-blue)" stroke-dasharray="6 4"/>
+  <!-- Secondary purple trace -->
+  <path d="M -20,520 L 80,520 L 80,640 L 200,640 L 200,480 L 400,480 L 400,600 L 560,600 L 560,440 L 700,440 L 700,580 L 900,580 L 900,460 L 1100,460 L 1100,620 L 1300,620 L 1300,500 L 1460,500"
+        stroke="#a855f7" stroke-width="1" fill="none" filter="url(#glow-blue)" stroke-dasharray="4 6" opacity="0.7"/>
+  <!-- Red accent trace -->
+  <path d="M 300,-10 L 300,80 L 480,80 L 480,160 L 600,160 L 600,60 L 800,60 L 800,140 L 1000,140 L 1000,50 L 1160,50 L 1160,130 L 1460,130"
+        stroke="#ef4444" stroke-width="0.8" fill="none" filter="url(#glow-red)" stroke-dasharray="3 8" opacity="0.5"/>
+  <!-- Circuit nodes (junction dots) -->
+  <circle cx="120" cy="200" r="3" fill="#3b82f6" filter="url(#glow-blue)" opacity="0.9"/>
+  <circle cx="480" cy="180" r="3" fill="#3b82f6" filter="url(#glow-blue)" opacity="0.9"/>
+  <circle cx="820" cy="220" r="3" fill="#3b82f6" filter="url(#glow-blue)" opacity="0.9"/>
+  <circle cx="1200" cy="260" r="3" fill="#3b82f6" filter="url(#glow-blue)" opacity="0.9"/>
+  <circle cx="200" cy="640" r="2.5" fill="#a855f7" opacity="0.8"/>
+  <circle cx="700" cy="440" r="2.5" fill="#a855f7" opacity="0.8"/>
+  <circle cx="1100" cy="460" r="2.5" fill="#a855f7" opacity="0.8"/>
+  <circle cx="480" cy="80" r="2" fill="#ef4444" opacity="0.7"/>
+  <circle cx="800" cy="60" r="2" fill="#ef4444" opacity="0.7"/>
+</svg>
+
+<!-- Vignette overlay -->
+<div class="vignette"></div>
+
+<!-- Site content -->
+<div class="site-wrap">
+
+  <!-- ── NAV ── -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo">
+        <span class="triangle">△</span> ANGEL CLOUD
+      </a>
+      <ul class="nav-links">
+        <li><a href="#mission">The Mission</a></li>
+        <li><a href="#ecosystem">The Ecosystem</a></li>
+        <li><a href="#hardware">The Pi</a></li>
+        <li><a href="https://github.com/thebardchat/shanebrain-core" class="nav-github" target="_blank" rel="noopener">GitHub ↗</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ── HERO ── -->
+  <section class="hero" id="top">
+    <div class="container">
+      <div class="hero-tagline">HAZEL GREEN, ALABAMA &nbsp;·&nbsp; RASPBERRY PI 5 &nbsp;·&nbsp; LOCAL AI</div>
+
+      <h1 class="hero-headline">
+        <span class="chrome-text">AI built for the</span>
+        <span class="chrome-text">people left behind.</span>
+      </h1>
+
+      <p class="hero-lead">
+        800 million Windows users are losing security updates. This is the infrastructure that proves local AI works — built on a $80 board in a closet, running 24/7, serving the world.
+      </p>
+
+      <div class="hero-ctas">
+        <a href="#ecosystem" class="btn-primary">Explore the Ecosystem →</a>
+        <a href="https://github.com/thebardchat/shanebrain-core" class="btn-secondary" target="_blank" rel="noopener">View on GitHub ↗</a>
+      </div>
+
+      <div class="hero-stats">
+        <div class="stat">
+          <div class="stat-pulse"></div>
+          <div class="stat-num">17</div>
+          <div class="stat-label">Bots Running</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">24/7</div>
+          <div class="stat-label">Uptime</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">$0</div>
+          <div class="stat-label">Cloud Costs</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">1</div>
+          <div class="stat-label">Pi 5</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-rule"></div>
+
+  <!-- ── ECOSYSTEM ── -->
+  <section class="ecosystem-section" id="ecosystem">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label">// system catalog</div>
+        <h2 class="section-title">The Ecosystem</h2>
+      </div>
+
+      <div class="cards-grid">
+
+        <a href="https://train.theangel.cloud" class="card" data-color="blue" target="_blank" rel="noopener">
+          <div class="card-accent-bar" style="background:#3b82f6;"></div>
+          <div class="card-body">
+            <div class="card-top">
+              <span class="card-num">01</span>
+              <span class="card-status-dot"></span>
+            </div>
+            <div class="card-name">AI-TRAINER-MAX</div>
+            <div class="card-desc">36 modules. 5 phases. $0. Local AI literacy for everyone.</div>
+            <div class="card-footer">
+              <span class="card-domain">train.theangel.cloud</span>
+              <span class="card-arrow">→</span>
+            </div>
+          </div>
+        </a>
+
+        <a href="https://crew.theangel.cloud" class="card" data-color="green" target="_blank" rel="noopener">
+          <div class="card-accent-bar" style="background:#22c55e;"></div>
+          <div class="card-body">
+            <div class="card-top">
+              <span class="card-num">02</span>
+              <span class="card-status-dot"></span>
+            </div>
+            <div class="card-name">MEGA CREW STORIES</div>
+            <div class="card-desc">17 autonomous bots writing noir episodes 24/7 on the Pi.</div>
+            <div class="card-footer">
+              <span class="card-domain">crew.theangel.cloud</span>
+              <span class="card-arrow">→</span>
+            </div>
+          </div>
+        </a>
+
+        <a href="https://finance.theangel.cloud" class="card" data-color="amber" target="_blank" rel="noopener">
+          <div class="card-accent-bar" style="background:#f5b400;"></div>
+          <div class="card-body">
+            <div class="card-top">
+              <span class="card-num">03</span>
+              <span class="card-status-dot"></span>
+            </div>
+            <div class="card-name">HALOFINANCE</div>
+            <div class="card-desc">AI-powered personal finance for working families.</div>
+            <div class="card-footer">
+              <span class="card-domain">finance.theangel.cloud</span>
+              <span class="card-arrow">→</span>
+            </div>
+          </div>
+        </a>
+
+        <a href="https://greenfield.theangel.cloud" class="card" data-color="red" target="_blank" rel="noopener">
+          <div class="card-accent-bar" style="background:#ef4444;"></div>
+          <div class="card-body">
+            <div class="card-top">
+              <span class="card-num">04</span>
+              <span class="card-status-dot"></span>
+            </div>
+            <div class="card-name">GREENFIELD</div>
+            <div class="card-desc">AI medical billing intake. Claude parses EOBs, flags errors.</div>
+            <div class="card-footer">
+              <span class="card-domain">greenfield.theangel.cloud</span>
+              <span class="card-arrow">→</span>
+            </div>
+          </div>
+        </a>
+
+        <a href="https://noir.theangel.cloud" class="card" data-color="purple" target="_blank" rel="noopener">
+          <div class="card-accent-bar" style="background:#a855f7;"></div>
+          <div class="card-body">
+            <div class="card-top">
+              <span class="card-num">05</span>
+              <span class="card-status-dot"></span>
+            </div>
+            <div class="card-name">NOIR DETECTIVE</div>
+            <div class="card-desc">Shane talks. Claude shapes. A noir book built on a Pi.</div>
+            <div class="card-footer">
+              <span class="card-domain">noir.theangel.cloud</span>
+              <span class="card-arrow">→</span>
+            </div>
+          </div>
+        </a>
+
+        <a href="https://book.theangel.cloud" class="card" data-color="blue" target="_blank" rel="noopener">
+          <div class="card-accent-bar" style="background:#3b82f6;"></div>
+          <div class="card-body">
+            <div class="card-top">
+              <span class="card-num">06</span>
+              <span class="card-status-dot"></span>
+            </div>
+            <div class="card-name">BOOK LAUNCH PLAYBOOK</div>
+            <div class="card-desc">The open-source guide to getting your book found. $0.</div>
+            <div class="card-footer">
+              <span class="card-domain">book.theangel.cloud</span>
+              <span class="card-arrow">→</span>
+            </div>
+          </div>
+        </a>
+
+        <a href="https://oblivion.theangel.cloud" class="card" data-color="red" target="_blank" rel="noopener">
+          <div class="card-accent-bar" style="background:#ef4444;"></div>
+          <div class="card-body">
+            <div class="card-top">
+              <span class="card-num">07</span>
+              <span class="card-status-dot"></span>
+            </div>
+            <div class="card-name">AI-TRAINER-OBLIVION</div>
+            <div class="card-desc">The next chapter. What comes after mastery.</div>
+            <div class="card-footer">
+              <span class="card-domain">oblivion.theangel.cloud</span>
+              <span class="card-arrow">→</span>
+            </div>
+          </div>
+        </a>
+
+        <a href="https://mcp.theangel.cloud" class="card" data-color="purple" target="_blank" rel="noopener">
+          <div class="card-accent-bar" style="background:#a855f7;"></div>
+          <div class="card-body">
+            <div class="card-top">
+              <span class="card-num">08</span>
+              <span class="card-status-dot"></span>
+            </div>
+            <div class="card-name">SHANEBRAIN MCP</div>
+            <div class="card-desc">42-tool MCP server. RAG, Weaviate, Ollama, vault. Fully local.</div>
+            <div class="card-footer">
+              <span class="card-domain">mcp.theangel.cloud</span>
+              <span class="card-arrow">→</span>
+            </div>
+          </div>
+        </a>
+
+        <a href="https://pico.theangel.cloud" class="card" data-color="blue" target="_blank" rel="noopener">
+          <div class="card-accent-bar" style="background:#3b82f6;"></div>
+          <div class="card-body">
+            <div class="card-top">
+              <span class="card-num">09</span>
+              <span class="card-status-dot"></span>
+            </div>
+            <div class="card-name">PICO NERVE ENDINGS</div>
+            <div class="card-desc">Pi Pico 2 firmware — the peripheral nervous system of ShaneBrain.</div>
+            <div class="card-footer">
+              <span class="card-domain">pico.theangel.cloud</span>
+              <span class="card-arrow">→</span>
+            </div>
+          </div>
+        </a>
+
+        <a href="https://pi.theangel.cloud" class="card" data-color="amber" target="_blank" rel="noopener">
+          <div class="card-accent-bar" style="background:#f5b400;"></div>
+          <div class="card-body">
+            <div class="card-top">
+              <span class="card-num">10</span>
+              <span class="card-status-dot"></span>
+            </div>
+            <div class="card-name">THE PI</div>
+            <div class="card-desc">Live access to the Raspberry Pi 5. Angel Cloud Gateway.</div>
+            <div class="card-footer">
+              <span class="card-domain">pi.theangel.cloud</span>
+              <span class="card-arrow">→</span>
+            </div>
+          </div>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+  <div class="section-rule"></div>
+
+  <!-- ── HARDWARE ── -->
+  <section class="hardware-section" id="hardware">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label">// the hardware</div>
+        <h2 class="section-title">One Board. Everything.</h2>
+      </div>
+      <div class="hardware-inner">
+        <div class="hw-left">
+          <div class="hw-pi-label">// raspberry pi 5</div>
+          <div class="hw-pi-big">Pi 5</div>
+          <div class="hw-specs-list">
+            <div class="hw-spec">16GB RAM</div>
+            <div class="hw-spec">RAID 1 NVMe Storage</div>
+            <div class="hw-spec">ARM64 Architecture</div>
+            <div class="hw-spec">27W · Always On</div>
+            <div class="hw-spec">$80 board. Zero compromise.</div>
+          </div>
+          <div class="hw-badge">System Online</div>
+        </div>
+        <div class="hw-right">
+          <div class="terminal">
+            <div class="terminal-bar">
+              <div class="term-dot red"></div>
+              <div class="term-dot amber"></div>
+              <div class="term-dot green"></div>
+              <span class="term-title">shanebrain@pulsar00100 — system specs</span>
+            </div>
+            <div class="terminal-body">
+              <div class="term-line"><span class="term-key">CPU</span><span class="term-val">ARM Cortex-A76 · 4 cores · 2.4 GHz</span></div>
+              <div class="term-line"><span class="term-key">RAM</span><span class="term-val">16 GB LPDDR4X</span></div>
+              <div class="term-line"><span class="term-key">Storage</span><span class="term-val">2× 2TB NVMe RAID 1</span></div>
+              <div class="term-line"><span class="term-key">OS</span><span class="term-val">Linux 6.12 aarch64</span></div>
+              <div class="term-line"><span class="term-key">Network</span><span class="term-val">Tailscale VPN · Wired</span></div>
+              <div class="term-line"><span class="term-key">Power</span><span class="term-val">27W USB-C · Always On</span></div>
+              <div class="term-line"><span class="term-key">Location</span><span class="term-val">Hazel Green, Alabama</span></div>
+              <div class="term-line"><span class="term-key">Bots</span><span class="term-val">17 running · llama3.2:1b local</span></div>
+              <div class="term-prompt">
+                <span style="color:var(--green)">shanebrain@pulsar00100</span>
+                <span style="color:var(--text-dim)">:~$</span>
+                <span class="term-cursor"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-rule"></div>
+
+  <!-- ── MISSION ── -->
+  <section class="mission-section" id="mission">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label">// the mission</div>
+        <h2 class="section-title">Built for the<br>left behind.</h2>
+      </div>
+      <div class="mission-inner">
+        <div class="mission-quote">
+          A dump truck dispatcher. A phone. An AI. A Raspberry Pi in a closet. This is what $0 cloud costs looks like.
+        </div>
+        <p class="mission-p">
+          <strong>800 million Windows users</strong> are about to lose security updates. They can't afford enterprise software. They don't have IT departments. They have families, jobs, bills — and they deserve the same AI infrastructure that corporations pay millions for.
+        </p>
+        <p class="mission-p">
+          Angel Cloud is the proof of concept. One Pi 5. One dispatcher in Alabama. <strong>17 bots running 24/7.</strong> RAG search, vector storage, local LLMs, Discord bots, financial tools, medical billing AI, creative writing pipelines — all of it on $80 of hardware, zero monthly cloud fees, fully private.
+        </p>
+        <div class="mission-divider"></div>
+        <p class="mission-p">
+          If it runs here, it runs everywhere. This is the architecture for <strong>the next billion people</strong> who need AI that respects their data, their budget, and their privacy.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-rule"></div>
+
+  <!-- ── FOOTER ── -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-inner">
+        <div>
+          <div class="footer-logo">△ ANGEL CLOUD</div>
+          <div class="footer-byline">
+            Built by Shane Brazelton<br>
+            Hazel Green, Alabama<br>
+            Raspberry Pi 5 · 100% Local
+          </div>
+          <a href="https://github.com/thebardchat/shanebrain-core" class="footer-github" target="_blank" rel="noopener">
+            ↗ github.com/thebardchat/shanebrain-core
+          </a>
+        </div>
+        <div>
+          <div class="footer-links-title">// ecosystem subdomains</div>
+          <div class="footer-domains">
+            <a href="https://train.theangel.cloud" target="_blank" rel="noopener">train.theangel.cloud</a>
+            <a href="https://crew.theangel.cloud" target="_blank" rel="noopener">crew.theangel.cloud</a>
+            <a href="https://finance.theangel.cloud" target="_blank" rel="noopener">finance.theangel.cloud</a>
+            <a href="https://greenfield.theangel.cloud" target="_blank" rel="noopener">greenfield.theangel.cloud</a>
+            <a href="https://noir.theangel.cloud" target="_blank" rel="noopener">noir.theangel.cloud</a>
+            <a href="https://book.theangel.cloud" target="_blank" rel="noopener">book.theangel.cloud</a>
+            <a href="https://oblivion.theangel.cloud" target="_blank" rel="noopener">oblivion.theangel.cloud</a>
+            <a href="https://mcp.theangel.cloud" target="_blank" rel="noopener">mcp.theangel.cloud</a>
+            <a href="https://pico.theangel.cloud" target="_blank" rel="noopener">pico.theangel.cloud</a>
+            <a href="https://pi.theangel.cloud" target="_blank" rel="noopener">pi.theangel.cloud</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span class="footer-copy">© 2026 Shane Brazelton · theangel.cloud · All systems local</span>
+        <span class="footer-pi-badge">Pi 5 Online · Hazel Green, AL</span>
+      </div>
+    </div>
+  </footer>
+
+</div><!-- /site-wrap -->
+
+<script>
+/* ─────────────────────────────────────────
+   BACKGROUND: Binary Rain + Perspective Grid
+───────────────────────────────────────── */
+(function() {
+  const canvas = document.getElementById('bg-canvas');
+  const ctx = canvas.getContext('2d');
+
+  let W, H;
+  let columns = [];
+  const CHAR_SIZE = 13;
+  const CHARS = '01';
+
+  // Grid state
+  let gridOffset = 0;
+
+  function resize() {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+    initColumns();
+  }
+
+  function initColumns() {
+    const count = Math.ceil(W / CHAR_SIZE);
+    // Keep existing columns, add/remove as needed
+    while (columns.length < count) {
+      columns.push({
+        x: columns.length * CHAR_SIZE,
+        y: Math.random() * -H,
+        speed: 0.6 + Math.random() * 1.2,
+        chars: [],
+        length: Math.floor(8 + Math.random() * 20),
+        color: Math.random() < 0.65 ? 'blue' : 'purple',
+        opacity: 0.04 + Math.random() * 0.08,
+      });
+    }
+    columns = columns.slice(0, count);
+  }
+
+  function drawGrid() {
+    // Perspective grid — horizon lines
+    const vanishY = H * 0.38;
+    const gridColor = 'rgba(15, 30, 80, 0.55)';
+    ctx.strokeStyle = gridColor;
+    ctx.lineWidth = 0.6;
+
+    // Horizontal lines (converge to vanishing point)
+    const numH = 18;
+    for (let i = 0; i <= numH; i++) {
+      const t = i / numH;
+      // Exponential spacing — more compressed at horizon
+      const y = vanishY + Math.pow(t, 1.8) * (H - vanishY);
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(W, y);
+      ctx.globalAlpha = 0.08 + t * 0.18;
+      ctx.stroke();
+    }
+
+    // Vertical lines (perspective)
+    const numV = 22;
+    const spread = W * 1.6;
+    for (let i = 0; i <= numV; i++) {
+      const t = (i / numV) - 0.5;
+      const bottomX = W / 2 + t * spread;
+      ctx.beginPath();
+      ctx.moveTo(W / 2, vanishY);
+      ctx.lineTo(bottomX, H);
+      ctx.globalAlpha = 0.04 + Math.abs(t) * 0.1;
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  let lastTime = 0;
+  function draw(time) {
+    const dt = Math.min(time - lastTime, 50);
+    lastTime = time;
+
+    ctx.clearRect(0, 0, W, H);
+
+    // Grid
+    drawGrid();
+
+    // Binary rain
+    columns.forEach(col => {
+      col.y += col.speed * (dt / 16);
+      if (col.y > H + col.length * CHAR_SIZE) {
+        col.y = -col.length * CHAR_SIZE * Math.random();
+        col.speed = 0.6 + Math.random() * 1.2;
+        col.color = Math.random() < 0.65 ? 'blue' : 'purple';
+        col.opacity = 0.04 + Math.random() * 0.08;
+      }
+
+      const baseColor = col.color === 'blue' ? '59,130,246' : '168,85,247';
+
+      for (let j = 0; j < col.length; j++) {
+        const charY = col.y + j * CHAR_SIZE;
+        if (charY < 0 || charY > H) continue;
+
+        // Fade: bright head, dark tail
+        const alpha = col.opacity * (1 - j / col.length) * (j === 0 ? 3 : 1);
+        ctx.globalAlpha = Math.min(alpha, 0.9);
+        ctx.font = `${CHAR_SIZE}px monospace`;
+        ctx.fillStyle = `rgb(${baseColor})`;
+
+        const char = CHARS[Math.floor(Math.random() * CHARS.length)];
+        ctx.fillText(char, col.x, charY);
+      }
+      ctx.globalAlpha = 1;
+    });
+
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', resize);
+  resize();
+  requestAnimationFrame(draw);
+})();
+
+/* ─────────────────────────────────────────
+   SCROLL REVEAL — Ecosystem Cards
+───────────────────────────────────────── */
+(function() {
+  const cards = document.querySelectorAll('.card');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const card = entry.target;
+        const index = parseInt(card.dataset.index || 0);
+        card.style.animationDelay = (index * 80) + 'ms';
+        card.classList.add('revealed');
+        observer.unobserve(card);
+      }
+    });
+  }, {
+    threshold: 0.08,
+    rootMargin: '0px 0px -40px 0px'
+  });
+
+  cards.forEach((card, i) => {
+    card.dataset.index = i;
+    observer.observe(card);
+  });
+})();
+
+/* ─────────────────────────────────────────
+   SMOOTH ANCHOR SCROLL
+───────────────────────────────────────── */
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const href = a.getAttribute('href');
+    if (href === '#') return;
+    const target = document.querySelector(href);
+    if (target) {
+      e.preventDefault();
+      const navH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h'));
+      const top = target.getBoundingClientRect().top + window.scrollY - navH - 20;
+      window.scrollTo({ top, behavior: 'smooth' });
+    }
+  });
+});
+</script>
+
+</body>
+</html>
